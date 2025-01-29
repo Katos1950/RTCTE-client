@@ -1,5 +1,6 @@
 import { useState } from "react"
 import "./Login.css"
+import ThreeD from "./ThreeD"
 
 export const Login = () => {
 
@@ -46,7 +47,7 @@ export const Login = () => {
 
       {/* 3d render */}
       <div className="Image-container">
-        <img src=""/>
+        <ThreeD/>
       </div>
     </div>
   )

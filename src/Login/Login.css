@@ -18,6 +18,7 @@
 
 .Image-container{
     background-color: aqua;
+    overflow: hidden; /* Prevent scrollbars */
 }
 
 .Form {
@@ -31,4 +32,11 @@
     border: 1px solid black;
     border-radius: 16px;
     box-shadow: -10px 10px 15px lightslategrey;
+}
+
+#myThreeJsCanvas {
+    width: 100%;
+    height: 100%;
+    display: block; /* Remove any default inline-block margin/padding */
+    object-fit: cover; /* Ensures the canvas covers the container without overflow */
 }
