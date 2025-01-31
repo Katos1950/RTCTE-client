@@ -1,11 +1,32 @@
 import { useState } from "react"
 import "./Login.css"
 import ThreeD from "./ThreeD"
+import axios from "axios"
+import { Link } from "react-router-dom"
 
 export const SignUp = () => {
 
+  const [userName,setUsername] = useState("")
+  const [emailId,setEmailId] = useState("")
   const [password,setPassword] = useState("")
   const [isVisible,setIsVisible] = useState(false)
+
+  const handleSignUp = async (e) =>{
+    e.preventDefault();
+
+    try{
+      const response = await axios.post("http://localhost:5000/users/signUp",{
+        userName,
+        emailId,
+        password
+      })
+      console.log(response.data)
+    }
+    catch(error){
+      console.log(error.response.data)
+    }
+  }
+
 
   return (
     <div className="Page-container">
@@ -16,7 +37,7 @@ export const SignUp = () => {
       </div>
 
       <div className="Login-container" >
-        <form className = "Form" onSubmit={()=>{}}>
+        <form className = "Form" onSubmit={handleSignUp}>
 
           {/* Sign In Text */}
           <div className="w-full h-2/6 justify-items-center place-content-center">
@@ -29,12 +50,20 @@ export const SignUp = () => {
             
           <div className="w-auto p-4 m-1">
                 <i class="bi bi-person-circle px-1"></i>
-                <input placeholder="Username" type="text" className="border border-black"/>
+                <input 
+                placeholder="Username" 
+                type="text" 
+                className="border border-black"
+                onChange={(e) => setUsername(e.target.value)}/>
             </div>
             
             <div className="w-auto p-4 m-1">
               <i className="bi bi-envelope px-1"/>
-              <input placeholder="Email Id" type="email" className="border border-black"/>
+              <input 
+              placeholder="Email Id" 
+              type="email" 
+              className="border border-black"
+              onChange={(e) => setEmailId(e.target.value)}/>
             </div>
 
             <div className="w-auto p-4 m-1">
@@ -45,14 +74,14 @@ export const SignUp = () => {
                 onChange={(e) => setPassword(e.target.value)} />            
             </div>
             
-            <button type="submit" className="w-auto h-5 p-4 border border-black flex items-center justify-center m-1">Sign In</button>
+            <button type="submit" className="w-auto h-5 p-4 border border-black flex items-center justify-center m-1">Register</button>
           </div>
 
           <hr className="w-full border-t-2 border-black" />
           
           {/* Sign up link */}
           <div className="w-full h-1/6 px-3 place-content-end">
-            <h6 className="p-1">Already Have an account? <a href="">Log In</a> </h6>
+            <h6 className="p-1">Already Have an account? <Link to="/">Log In</Link> </h6>
           </div>
         </form>
       </div>
