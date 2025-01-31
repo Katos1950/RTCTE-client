@@ -2,24 +2,36 @@ import { useState } from "react"
 import "./Login.css"
 import ThreeD from "./ThreeD"
 
-export const Login = () => {
+export const SignUp = () => {
 
   const [password,setPassword] = useState("")
   const [isVisible,setIsVisible] = useState(false)
 
   return (
     <div className="Page-container">
+    
+        {/* 3d render */}
+      <div className="Image-container">
+        <ThreeD/>
+      </div>
+
       <div className="Login-container" >
         <form className = "Form" onSubmit={()=>{}}>
 
           {/* Sign In Text */}
           <div className="w-full h-2/6 justify-items-center place-content-center">
-            <h1 className="text-3xl">Welcome Back!</h1>
+            <h1 className="text-3xl">Create An Account</h1>
           </div>
           <hr className="w-full border-t-2 border-black" />
           
           {/* Email, password and sign in button */}
           <div className="w-full flex flex-col place-content-center justify-items-center items-center">
+            
+          <div className="w-auto p-4 m-1">
+                <i class="bi bi-person-circle px-1"></i>
+                <input placeholder="Username" type="text" className="border border-black"/>
+            </div>
+            
             <div className="w-auto p-4 m-1">
               <i className="bi bi-envelope px-1"/>
               <input placeholder="Email Id" type="email" className="border border-black"/>
@@ -40,15 +52,11 @@ export const Login = () => {
           
           {/* Sign up link */}
           <div className="w-full h-1/6 px-3 place-content-end">
-            <h6 className="p-1">Dont have an account? <a href="" >Sign Up</a> </h6>
+            <h6 className="p-1">Already Have an account? <a href="">Log In</a> </h6>
           </div>
         </form>
       </div>
 
-      {/* 3d render */}
-      <div className="Image-container">
-        <ThreeD/>
-      </div>
     </div>
   )
 }

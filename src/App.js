@@ -1,9 +1,9 @@
 import { Login } from "./Login/Login";
-
+import {SignUp} from './Login/SignUp';  
 
 const App = () => {
   return (
-    <Login/>
+    <SignUp/>
   )
 }
 
