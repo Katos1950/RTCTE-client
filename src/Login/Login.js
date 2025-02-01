@@ -1,76 +1,90 @@
-import { useState } from "react"
-import "./Login.css"
-import ThreeD from "./ThreeD"
-import axios from "axios"
-import { Link } from "react-router-dom"
-import {SignUp} from "./SignUp"
+import { useState } from "react";
+import "./Login.css";
+import ThreeD from "./ThreeD";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import * as Yup from "yup";
 
 export const Login = () => {
-  const [emailId,setEmailId] = useState("")
-  const [password,setPassword] = useState("")
-  const [isVisible,setIsVisible] = useState(false)
+  const [emailId, setEmailId] = useState("");
+  const [password, setPassword] = useState("");
+  const [isVisible, setIsVisible] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const handleLogin = async (e) =>{
+  const validationSchema = Yup.object({
+    emailId: Yup.string().required("Email is required").email("Invalid email format"),
+    password: Yup.string().required("Password is required"),
+  });
+
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setErrors({}); // Reset errors before validation
 
-    try{
-      const response = await axios.post("http://localhost:4000/users/login",{
+    try {
+      await validationSchema.validate({ emailId, password }, { abortEarly: false });
+
+      const response = await axios.post("http://localhost:4000/users/login", {
         emailId,
-        password
-      })
-      console.log(response.data)
+        password,
+      });
+
+      console.log(response.data);
+    } catch (error) {
+      const newErrors = {};
+      if (error.inner) {
+        error.inner.forEach((err) => {
+          newErrors[err.path] = err.message;
+        });
+      } else if (error.response && error.response.data) {
+        Object.keys(error.response.data).forEach((key) => {
+          newErrors[key] = error.response.data[key];
+        });
+      }
+      setErrors(newErrors);
     }
-    catch(error){
-      console.log(error.response.data)
-    }
-  }
+  };
 
   return (
     <div className="Page-container">
-      <div className="Login-container" >
-        <form className = "Form" onSubmit={handleLogin}>
+      <div className="Login-container">
+        <form className="Form" onSubmit={handleLogin}>
+          <h1 className="text-3xl">Welcome Back!</h1>
+          <hr className="divider" />
 
-          {/* Sign In Text */}
-          <div className="w-full h-2/6 justify-items-center place-content-center">
-            <h1 className="text-3xl">Welcome Back!</h1>
+          <div className="input-container">
+            <i className="bi bi-envelope px-1" />
+            <input
+              placeholder="Email Id"
+              type="email"
+              value={emailId}
+              onChange={(e) => setEmailId(e.target.value)}
+            />
           </div>
-          <hr className="w-full border-t-2 border-black" />
-          
-          {/* Email, password and sign in button */}
-          <div className="w-full flex flex-col place-content-center justify-items-center items-center">
-            <div className="w-auto p-4 m-1">
-              <i className="bi bi-envelope px-1"/>
-              <input 
-              placeholder="Email Id" 
-              type="email" 
-              className="border border-black"
-              onChange={(e) => setEmailId(e.target.value)}/>
-            </div>
+          {errors.emailId && <p className="error">{errors.emailId}</p>}
 
-            <div className="w-auto p-4 m-1">
-              <i className="bi bi-lock px-1"></i>
-              <input 
-                placeholder="Password" 
-                type={isVisible?"text":"password"}
-                onChange={(e) => setPassword(e.target.value)} />            
-            </div>
-            
-            <button type="submit" className="w-auto h-5 p-4 border border-black flex items-center justify-center m-1">Sign In</button>
+          <div className="input-container">
+            <i className="bi bi-lock px-1"></i>
+            <input
+              placeholder="Password"
+              type={isVisible ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
+          {errors.password && <p className="error">{errors.password}</p>}
 
-          <hr className="w-full border-t-2 border-black" />
-          
-          {/* Sign up link */}
-          <div className="w-full h-1/6 px-3 place-content-end">
-            <h6 className="p-1">Dont have an account? <Link to="/signup" >Sign Up</Link> </h6>
-          </div>
+          <button type="submit" className="btn">Sign In</button>
+          <hr className="divider" />
+
+          <p>
+            Don't have an account? <Link to="/signup">Sign Up</Link>
+          </p>
         </form>
       </div>
 
-      {/* 3d render */}
       <div className="Image-container">
-        <ThreeD/>
+        <ThreeD />
       </div>
     </div>
-  )
-}
+  );
+};

@@ -1,42 +1,113 @@
-.Page-container{
+/* Container Layout */
+.Page-container {
     width: 100vw;
     height: 100vh;  
-    align-items: center;
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap; /* Allows wrapping on smaller screens */
 }
 
-.Login-container, .Image-container{
+/* Left & Right Containers */
+.Login-container, .Image-container {
     width: 50%;
     height: 100%;
     background-color: lightgray;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    display: flex;
-    flex-direction: column;
 }
 
-.Image-container{
+.Image-container {
     background-color: aqua;
-    overflow: hidden; /* Prevent scrollbars */
+    overflow: hidden;
 }
 
+/* Form Styling */
 .Form {
-
     width: 80%;
-    height: 60%;
-    align-items:center;
-    justify-content: space-evenly;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid black;
+    max-width: 400px; /* Prevents form from being too wide */
+    background: white;
+    padding: 20px;
     border-radius: 16px;
     box-shadow: -10px 10px 15px lightslategrey;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-#myThreeJsCanvas {
+/* Input Fields */
+.input-container {
     width: 100%;
-    height: 100%;
-    display: block; /* Remove any default inline-block margin/padding */
-    object-fit: cover; /* Ensures the canvas covers the container without overflow */
+    display: flex;
+    align-items: center;
+    background: #f9f9f9;
+    border: 1px solid black;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+}
+
+.input-container input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    padding-left: 10px;
+}
+
+/* Error Messages */
+.error {
+    color: red;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+/* Buttons */
+.btn {
+    width: 100%;
+    padding: 12px;
+    background: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background: darkgray;
+}
+
+/* Dividers */
+.divider {
+    width: 100%;
+    border: 0;
+    height: 1px;
+    background: black;
+    margin: 15px 0;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .Page-container {
+        flex-direction: column;
+        height: 100vh;
+        padding: 20px;
+    }
+
+    .Login-container{
+        width: 100%;
+        height: 100vh;
+    }
+
+    .Image-container {
+        display: none; /* Hide the ThreeD component on small screens */
+    }
+
+    .Form {
+        width: 90%;
+    }
 }
