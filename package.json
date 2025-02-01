@@ -12,7 +12,8 @@
     "react-router-dom": "^7.1.4",
     "react-scripts": "5.0.1",
     "tailwindcss": "^1.9.6",
-    "three": "^0.172.0"
+    "three": "^0.172.0",
+    "yup": "^1.6.1"
   },
   "scripts": {
     "start": "react-scripts start",
