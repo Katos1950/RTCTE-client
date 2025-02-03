@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./Login.css";
 import ThreeD from "./ThreeD";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
 export const SignUp = () => {
@@ -12,7 +12,7 @@ export const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [errors, setErrors] = useState({});
-
+  const navigate = useNavigate()
   const validationSchema = Yup.object({
     userName: Yup.string().required("Username is required"),
     emailId: Yup.string()
@@ -46,6 +46,9 @@ export const SignUp = () => {
         password,
       });
 
+      if(response.status === 201){
+        navigate("/");
+      }
       console.log(response.data);
     } catch (error) {
       const newErrors = {};

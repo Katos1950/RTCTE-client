@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./Login.css";
 import ThreeD from "./ThreeD";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
 export const Login = () => {
@@ -10,6 +10,7 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate(); // Hook to handle navigation
 
   const validationSchema = Yup.object({
     emailId: Yup.string().required("Email is required").email("Invalid email format"),
@@ -19,7 +20,7 @@ export const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrors({}); // Reset errors before validation
-
+    
     try {
       await validationSchema.validate({ emailId, password }, { abortEarly: false });
 
@@ -28,7 +29,13 @@ export const Login = () => {
         password,
       });
 
-      console.log(response.data);
+      console.log(response.status);
+      if(response.status === 200){
+        localStorage.setItem("token",response.data.accessToken)
+        localStorage.setItem("refreshToken",response.data.refreshToken)
+        console.log(response.data.refreshToken)
+        navigate("/dashboard");
+      }
     } catch (error) {
       const newErrors = {};
       if (error.inner) {
