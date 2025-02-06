@@ -6,6 +6,8 @@ import "./Dashboard.css";
 export const Dashboard = () => {
     const [documents, setDocuments] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
+    //let user = {}
+    const [user,setUser] = useState({})
     const navigate = useNavigate();
 
     const getDocuments = async () => {
@@ -16,6 +18,61 @@ export const Dashboard = () => {
             });
             setDocuments(response.data);
         } catch (error) {
+            handleAuthError(error);
+        }
+    };
+
+    const getUserProfile = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get("http://localhost:5000/users/profile", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setUser(response.data);
+            //user = response.data;
+        } catch (error) {
+            handleAuthError(error);
+        }
+    };
+
+
+    const handleAuthError = async (error) => {
+        if (error.response?.status === 403) {
+            try {
+                const newToken = await axios.post("http://localhost:4000/users/token", {
+                    token: localStorage.getItem("refreshToken"),
+                });
+                if (newToken) {
+                    localStorage.setItem("token", newToken.data.accessToken);
+                    getDocuments();
+                    getUserProfile();
+                    return;
+                }
+            } catch {
+                navigate("/");
+            }
+        }
+        console.error("Error:", error);
+    };
+
+    useEffect(() => {
+        getDocuments();
+        getUserProfile();
+    }, []);
+
+    const createNewDoc = async ()=>{
+        try{
+            const token = localStorage.getItem("token");
+            const response = await axios.post("http://localhost:5000/users/createNewDoc", 
+                {emailId:user.emailId},
+                {headers: { Authorization: `Bearer ${token}` }}
+            )
+            
+            if (response.status === 201) {
+                navigate(`/document/${response.data._id}`); // Redirect to the new document
+            }
+        }
+        catch(error){
             if (error.response?.status === 403) {
                 try {
                     const newToken = await axios.post("http://localhost:4000/users/token", {
@@ -23,19 +80,16 @@ export const Dashboard = () => {
                     });
                     if (newToken) {
                         localStorage.setItem("token", newToken.data.accessToken);
-                        return getDocuments();
+                        createNewDoc()
+                        return;
                     }
                 } catch {
                     navigate("/");
                 }
             }
-            console.error("Error fetching documents:", error);
+            console.error("Error:", error);
         }
-    };
-
-    useEffect(() => {
-        getDocuments();
-    }, []);
+    }
 
     const filteredDocs = documents.filter((doc) =>
         doc.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -47,12 +101,13 @@ export const Dashboard = () => {
                 <h1 className="title">LetterPad</h1>
                 <button className="profile-btn">
                     <i className="bi bi-person-circle"></i>
+                    <span><p>{user.userName}</p></span>
                 </button>
             </header>
             <hr className="divider" />
 
             <div className="new-doc-section">
-                <button className="new-doc-btn">
+                <button className="new-doc-btn" onClick={createNewDoc}>
                     <img src="/blank.jpg" alt="New Document" className="doc-icon" />
                     <span>Blank Document</span>
                 </button>

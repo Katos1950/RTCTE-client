@@ -33,7 +33,6 @@ export const Login = () => {
       if(response.status === 200){
         localStorage.setItem("token",response.data.accessToken)
         localStorage.setItem("refreshToken",response.data.refreshToken)
-        console.log(response.data.refreshToken)
         navigate("/dashboard");
       }
     } catch (error) {
