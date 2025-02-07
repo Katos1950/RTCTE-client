@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef} from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Dashboard.css";
@@ -6,9 +6,50 @@ import "./Dashboard.css";
 export const Dashboard = () => {
     const [documents, setDocuments] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
-    //let user = {}
+    const [showModal,setShowModal] = useState(false);
+    const [docName,setDocName] = useState("")
+    const [createDocError,setCreateDocError] = useState("")
     const [user,setUser] = useState({})
+    const [filterType,setFilterType]= useState('A');
+    const [menuOpen,setMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+    const buttonRef = useRef(null);
+
     const navigate = useNavigate();
+
+    const openModal = ()=> setShowModal(true);
+    const closeModal = ()=> {
+        setDocName("")
+        setCreateDocError("")
+        setShowModal(false);
+    }
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target) &&
+                buttonRef.current && !buttonRef.current.contains(event.target)) {
+                setMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
+    const checkIfDocExists =()=>{
+        if(docName==="")
+            setCreateDocError("Name is required")
+        else if(documents.find(doc => doc.name === docName)){
+            setCreateDocError("Document already exists")
+        }
+        else{
+            setCreateDocError("");
+            createNewDoc();
+        }
+    }
 
     const getDocuments = async () => {
         try {
@@ -64,7 +105,7 @@ export const Dashboard = () => {
         try{
             const token = localStorage.getItem("token");
             const response = await axios.post("http://localhost:5000/users/createNewDoc", 
-                {emailId:user.emailId},
+                {emailId:user.emailId, name:docName},
                 {headers: { Authorization: `Bearer ${token}` }}
             )
             
@@ -91,27 +132,162 @@ export const Dashboard = () => {
         }
     }
 
-    const filteredDocs = documents.filter((doc) =>
-        doc.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredDocs = ()=>{
+        if(filterType==='A'){
+            return documents.filter((doc) =>
+            doc.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        }
+        else if(filterType === 'C'){
+            return documents.filter((doc) =>
+                doc.name.toLowerCase().includes(searchQuery.toLowerCase()) 
+                &&
+                doc.createdBy === user.emailId)
+        }
+        else if(filterType === 'S'){
+            return documents.filter((doc) =>
+                doc.name.toLowerCase().includes(searchQuery.toLowerCase()) 
+                &&
+                doc.allowedUsers.includes(user.emailId))
+        }
+        else return []   
+    }
+
+    const deleteDoc = async (documentName)=>{
+        try{
+            const token = localStorage.getItem("token");
+            const response = await axios.delete("http://localhost:5000/users/documents/del", {
+                headers: { Authorization: `Bearer ${token}` },
+                data: { emailId: user.emailId, name: documentName }
+            })
+            getDocuments()
+        }
+        catch(error){
+            if (error.response?.status === 403) {
+                try {
+                    const newToken = await axios.post("http://localhost:4000/users/token", {
+                        token: localStorage.getItem("refreshToken"),
+                    });
+                    if (newToken) {
+                        localStorage.setItem("token", newToken.data.accessToken);
+                        deleteDoc(documentName)
+                        return;
+                    }
+                } catch {
+                    navigate("/");
+                }
+            }
+            console.error("Error:", error);
+        }
+    }
+
+    const logout = async () => {
+        await axios.delete("http://localhost:4000/users/logout", {
+            data: { token: localStorage.getItem("refreshToken") },
+        });
+        navigate("/");
+    }
 
     return (
         <div className="dashboard">
             <header className="title-bar">
                 <h1 className="title">LetterPad</h1>
-                <button className="profile-btn">
-                    <i className="bi bi-person-circle"></i>
-                    <span><p>{user.userName}</p></span>
-                </button>
+                <div className="profile-container">
+                    <button
+                        ref={buttonRef}
+                        className="profile-btn"
+                        onClick={() => setMenuOpen(!menuOpen)}
+                    >
+                        <i className="bi bi-person-circle"></i>
+                    </button>
+                    {menuOpen && (
+                        <div ref={menuRef} className="profile-menu">
+                            <p className="menu-item">{user.userName}</p>
+                            <button className="menu-item">Edit Profile</button>
+                            <button className="menu-item">Requests</button>
+                            <button className="menu-item" onClick={logout}>Logout</button>
+                        </div>
+                    )}
+                </div>
             </header>
+            <style jsx>{`
+                .profile-container {
+                    position: relative;
+                }
+                .profile-menu {
+                    position: absolute;
+                    top: 100%;
+                    right: 0;
+                    background: black;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    border-radius: 8px;
+                    padding: 10px;
+                    display: flex;
+                    flex-direction: column;
+                    min-width: 150px;
+                }
+                .menu-item {
+                    padding: 10px;
+                    border: none;
+                    background: none;
+                    text-align: left;
+                    cursor: pointer;
+                }
+                .menu-item:hover {
+                    background: lightgray;
+                }
+            `}</style>
             <hr className="divider" />
 
             <div className="new-doc-section">
-                <button className="new-doc-btn" onClick={createNewDoc}>
+                <button className="new-doc-btn" onClick={openModal}>
+                {/* <button className="new-doc-btn" onClick={createNewDoc}> */}
                     <img src="/blank.jpg" alt="New Document" className="doc-icon" />
                     <span>Blank Document</span>
                 </button>
             </div>
+
+            {showModal && (
+              <div
+                id="default-modal"
+                tabIndex="-1"
+                
+                className="fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-gray-800 bg-opacity-50"
+              >
+                <div className="relative p-4 w-full max-w-sm rounded-lg shadow bg-gray-800">
+                  <div className="p-4 space-y-4">
+                    <p className="text-2xl leading-relaxed text-white">
+                      Name of the document?
+                    </p>
+
+                    <div className="flex items-center justify-center p-4 md:p-5 border-t  rounded-b border-gray-400">
+                        <input type="text" 
+                        placeholder="name" 
+                        value={docName}
+                        onChange={(e) => setDocName(e.target.value)}></input>
+                    </div>
+                    { createDocError && <p className="text-red-600">{createDocError}</p>}
+
+
+                    <div className="flex items-center justify-center p-4 md:p-5  rounded-b border-gray-400">
+                    <button
+                      className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-8 py-3 text-center"
+                      onClick={closeModal}
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                      className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-8 py-3 text-center"
+                      onClick={checkIfDocExists}
+                    >
+                      OK
+                    </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <hr className="divider" />
 
             <div className="search-bar">
@@ -125,16 +301,48 @@ export const Dashboard = () => {
                 />
             </div>
 
+            <hr className="divider" />
+
+            <div className="w-full flex flex-row">
+                <button className="px-1 m-1 border-2 border-solid border-gray-900" onClick={()=>setFilterType('A')}>All</button>
+                <button className="px-1 m-1 border-2 border-solid border-gray-900" onClick={()=>setFilterType('C')}>Created By You</button>
+                <button className="px-1 m-1 border-2 border-solid border-gray-900" onClick={()=>setFilterType('S')}>Shared With You</button>
+            </div>
+
+            <div className="w-full flex flex-row ml-2 mt-2">
+                <p className="w-3/5">Name</p>
+                <p className="w-2/5">Created By</p>
+            </div>
+
             <div className="documents-list">
-                {filteredDocs.length > 0 ? (
-                    filteredDocs.map((doc) => (
+                {filteredDocs().length > 0 ? (
+                    filteredDocs().map((doc) => (
                         <button 
                             key={doc._id} 
                             className="document-btn" 
                             onClick={() => navigate(`/document/${doc._id}`)}
                         >
-                            {doc.name}
-                        </button>
+                            <div className="flex flex-row">
+                                <div className="w-3/5">
+                                    {doc.name}
+                                </div>
+                                <div className="w-2/5">
+                                    {doc.createdBy}
+                                </div>
+                                {
+                                    (doc.createdBy===user.emailId)?
+                                        <span className="w-10 flex flex-row justify-center items-center border-2 border-solid border-black" onClick={(e)=>{
+                                            e.stopPropagation(); // Prevents the button click from firing
+                                            deleteDoc(doc.name)}}>
+                                            <i className="bi bi-trash"></i>
+                                        </span>
+                                        :
+                                        <span className="w-10 flex flex-row justify-center items-center border-2 border-solid border-gray-400 text-gray-400 cursor-not-allowed" title="You cannot delete this document">
+                                        <i className="bi bi-trash"></i>
+                                        </span>                                   
+                                }
+                            </div>
+                        </button>  
                     ))
                 ) : (
                     <p className="no-docs-message">No documents found.</p>
