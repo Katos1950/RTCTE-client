@@ -14,6 +14,9 @@ export const Dashboard = () => {
     const [menuOpen,setMenuOpen] = useState(false);
     const menuRef = useRef(null);
     const buttonRef = useRef(null);
+    const [currentName,setCurrentName] = useState("")
+    const [renDoc,setRenDoc] = useState("")
+    const [isRenaming,setIsRenaming] = useState(false)
 
     const navigate = useNavigate();
 
@@ -22,6 +25,8 @@ export const Dashboard = () => {
         setDocName("")
         setCreateDocError("")
         setShowModal(false);
+        setIsRenaming(false)
+        setRenDoc("")
     }
 
     useEffect(() => {
@@ -40,14 +45,28 @@ export const Dashboard = () => {
     }, []);
 
     const checkIfDocExists =()=>{
-        if(docName==="")
-            setCreateDocError("Name is required")
-        else if(documents.find(doc => doc.name === docName)){
-            setCreateDocError("Document already exists")
+        if(isRenaming){
+            if(renDoc==="")
+                setCreateDocError("Name is required")
+            else if(documents.find(doc => doc.name === renDoc)){
+                setCreateDocError("Document already exists")
+            }
+            else{
+                setCreateDocError("");
+                renameDoc()
+                closeModal()
+            }    
         }
         else{
-            setCreateDocError("");
-            createNewDoc();
+            if(docName==="")
+                setCreateDocError("Name is required")
+            else if(documents.find(doc => doc.name === docName)){
+                setCreateDocError("Document already exists")
+            }
+            else{
+                setCreateDocError("");
+                createNewDoc();
+            }
         }
     }
 
@@ -180,6 +199,35 @@ export const Dashboard = () => {
         }
     }
 
+    const renameDoc = async ()=>{
+        try{
+            const token = localStorage.getItem("token");
+            const response = await axios.put(
+                "http://localhost:5000/users/documents/rename",
+                { emailId: user.emailId, name: currentName, newName: renDoc }, // Body data
+                { headers: { Authorization: `Bearer ${token}` } } // Headers separately
+              );
+              getDocuments()
+        }
+        catch(error){
+            if (error.response?.status === 403) {
+                try {
+                    const newToken = await axios.post("http://localhost:4000/users/token", {
+                        token: localStorage.getItem("refreshToken"),
+                    });
+                    if (newToken) {
+                        localStorage.setItem("token", newToken.data.accessToken);
+                        renameDoc()
+                        return;
+                    }
+                } catch {
+                    navigate("/");
+                }
+            }
+            console.error("Error:", error);
+        }
+    }
+
     const logout = async () => {
         await axios.delete("http://localhost:4000/users/logout", {
             data: { token: localStorage.getItem("refreshToken") },
@@ -256,14 +304,19 @@ export const Dashboard = () => {
                 <div className="relative p-4 w-full max-w-sm rounded-lg shadow bg-gray-800">
                   <div className="p-4 space-y-4">
                     <p className="text-2xl leading-relaxed text-white">
-                      Name of the document?
+                      {isRenaming?"Rename to?":"Name of the document?"}
                     </p>
 
                     <div className="flex items-center justify-center p-4 md:p-5 border-t  rounded-b border-gray-400">
                         <input type="text" 
                         placeholder="name" 
-                        value={docName}
-                        onChange={(e) => setDocName(e.target.value)}></input>
+                        value={isRenaming?renDoc:docName}
+                        onChange={(e) => {
+                            if(isRenaming)
+                                setRenDoc(e.target.value)
+                            else
+                                setDocName(e.target.value)
+                        }}></input>
                     </div>
                     { createDocError && <p className="text-red-600">{createDocError}</p>}
 
@@ -329,6 +382,21 @@ export const Dashboard = () => {
                                 <div className="w-2/5">
                                     {doc.createdBy}
                                 </div>
+                                {
+                                    (doc.createdBy===user.emailId)?
+                                        <span className="w-10 flex flex-row justify-center items-center border-2 border-solid border-black" onClick={(e)=>{
+                                            e.stopPropagation(); // Prevents the button click from firing
+                                            setCurrentName(doc.name)
+                                            setIsRenaming(true)
+                                            openModal()
+                                            }}>
+                                            <i className="bi bi-pen"></i>
+                                        </span>
+                                        :
+                                        <span className="w-10 flex flex-row justify-center items-center border-2 border-solid border-gray-400 text-gray-400 cursor-not-allowed" title="You cannot delete this document">
+                                        <i className="bi bi-pen"></i>
+                                        </span>                                   
+                                }
                                 {
                                     (doc.createdBy===user.emailId)?
                                         <span className="w-10 flex flex-row justify-center items-center border-2 border-solid border-black" onClick={(e)=>{
