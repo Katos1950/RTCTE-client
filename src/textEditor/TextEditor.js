@@ -19,7 +19,8 @@ const TOOLBAR_OPTIONS = [
 export const TextEditor = () => {
   const [socket, setSocket] = useState();
   const [quill, setQuill] = useState();
-  const { id: documentId } = useParams();
+  const { id: documentId, emailId:emailId } = useParams();
+  const [activeUsers, setActiveUsers] = useState([]);
   const SAVE_INTERVAL_MS = 2000;
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export const TextEditor = () => {
       quill.enable();
   });
 
-    socket.emit("get-document", documentId);
+    socket.emit("get-document", {documentId,emailId});
   }, [socket, quill, documentId]);
 
   useEffect(() => {
@@ -83,6 +84,22 @@ export const TextEditor = () => {
     };
   }, [socket, quill]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for active users updates
+    const handler = (users) => {
+      setActiveUsers(users);  // Update the active users list
+    };
+
+    socket.on("update-active-users", handler);
+
+    return () => {
+      socket.off("update-active-users", handler); // Cleanup the listener
+    };
+  }, [socket]);
+
+
   const editorRef = useCallback(wrapper => {
     if (wrapper == null) return;
 
@@ -95,5 +112,5 @@ export const TextEditor = () => {
     setQuill(q);
   }, []);
 
-  return <div className='container' ref={editorRef}></div>;
+  return <div className='container' ref={editorRef}>{console.log(activeUsers)}</div>;
 };

@@ -336,7 +336,7 @@ export const Dashboard = () => {
                         <button 
                             key={doc._id} 
                             className="document-btn" 
-                            onClick={() => navigate(`/document/${doc._id}`)}
+                            onClick={() => navigate(`/document/${doc._id}/${user.emailId}`)}
                         >
                             <div className="flex flex-row">
                                 <div className="w-3/5">
