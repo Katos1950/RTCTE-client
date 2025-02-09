@@ -78,7 +78,10 @@ export const Dashboard = () => {
             });
             setDocuments(response.data);
         } catch (error) {
-            handleAuthError(error);
+            handleAuthError(error,()=>{
+                getDocuments();
+                getUserProfile();
+            });
         }
     };
 
@@ -91,12 +94,15 @@ export const Dashboard = () => {
             setUser(response.data);
             //user = response.data;
         } catch (error) {
-            handleAuthError(error);
+            handleAuthError(error,()=>{
+                getDocuments();
+                getUserProfile();
+            });
         }
     };
 
 
-    const handleAuthError = async (error) => {
+    const handleAuthError = async (error,fn) => {
         if (error.response?.status === 403) {
             try {
                 const newToken = await axios.post("http://localhost:4000/users/token", {
@@ -104,8 +110,7 @@ export const Dashboard = () => {
                 });
                 if (newToken) {
                     localStorage.setItem("token", newToken.data.accessToken);
-                    getDocuments();
-                    getUserProfile();
+                    fn()
                     return;
                 }
             } catch {
@@ -133,21 +138,7 @@ export const Dashboard = () => {
             }
         }
         catch(error){
-            if (error.response?.status === 403) {
-                try {
-                    const newToken = await axios.post("http://localhost:4000/users/token", {
-                        token: localStorage.getItem("refreshToken"),
-                    });
-                    if (newToken) {
-                        localStorage.setItem("token", newToken.data.accessToken);
-                        createNewDoc()
-                        return;
-                    }
-                } catch {
-                    navigate("/");
-                }
-            }
-            console.error("Error:", error);
+            handleAuthError(error,createNewDoc)
         }
     }
 
@@ -181,21 +172,7 @@ export const Dashboard = () => {
             getDocuments()
         }
         catch(error){
-            if (error.response?.status === 403) {
-                try {
-                    const newToken = await axios.post("http://localhost:4000/users/token", {
-                        token: localStorage.getItem("refreshToken"),
-                    });
-                    if (newToken) {
-                        localStorage.setItem("token", newToken.data.accessToken);
-                        deleteDoc(documentName)
-                        return;
-                    }
-                } catch {
-                    navigate("/");
-                }
-            }
-            console.error("Error:", error);
+            handleAuthError(error,()=>deleteDoc(documentName))
         }
     }
 
@@ -210,21 +187,7 @@ export const Dashboard = () => {
               getDocuments()
         }
         catch(error){
-            if (error.response?.status === 403) {
-                try {
-                    const newToken = await axios.post("http://localhost:4000/users/token", {
-                        token: localStorage.getItem("refreshToken"),
-                    });
-                    if (newToken) {
-                        localStorage.setItem("token", newToken.data.accessToken);
-                        renameDoc()
-                        return;
-                    }
-                } catch {
-                    navigate("/");
-                }
-            }
-            console.error("Error:", error);
+            handleAuthError(error,renameDoc)
         }
     }
 
