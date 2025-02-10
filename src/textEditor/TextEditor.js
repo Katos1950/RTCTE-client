@@ -4,6 +4,7 @@ import 'quill/dist/quill.snow.css';
 import { io } from "socket.io-client";
 import { useParams } from 'react-router-dom';
 import "./TextEditor.css";
+import { useNavigate } from "react-router-dom";
 
 const TOOLBAR_OPTIONS = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -21,7 +22,25 @@ export const TextEditor = () => {
   const [quill, setQuill] = useState();
   const { id: documentId, emailId:emailId } = useParams();
   const [activeUsers, setActiveUsers] = useState([]);
+  const [showActiveUsers,setShowActiveUsers] = useState(false)
   const SAVE_INTERVAL_MS = 2000;
+  const navigate = useNavigate();
+  
+  const dropdownRef = useRef(null);
+
+    // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowActiveUsers(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const s = io("http://localhost:3001");
@@ -112,5 +131,22 @@ export const TextEditor = () => {
     setQuill(q);
   }, []);
 
-  return <div className='container' ref={editorRef}>{console.log(activeUsers)}</div>;
+  return (
+    <div className='w-full h-full relative'>
+      <div className='w-full h-10 flex flex-row justify-between items-center relative'>
+        <i onClick={() => { navigate("/dashboard") }} className="p-3 bi bi-arrow-left-circle w-4/12 text-2xl"></i>
+        <p className='w-4/12 text-center text-2xl'>LetterPad</p>
+        <div className='relative w-4/12 text-right' ref={dropdownRef}>
+          <i onClick={() => setShowActiveUsers(!showActiveUsers)} className="p-3 bi bi-people text-2xl cursor-pointer"></i>
+          {showActiveUsers && (
+            <div className='absolute right-0 mt-2 w-auto bg-purple-500 text-white p-2 rounded shadow-lg z-10'>
+              {activeUsers.map((user)=><p>{user}</p>)}       
+            </div>
+          )}
+        </div>
+      </div>
+      <div className='container' ref={editorRef}></div>
+    </div>
+  );
+  
 };
