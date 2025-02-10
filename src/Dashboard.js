@@ -134,7 +134,7 @@ export const Dashboard = () => {
             )
             
             if (response.status === 201) {
-                navigate(`/document/${response.data._id}`); // Redirect to the new document
+                navigate(`/document/${response.data._id}/${user.emailId}`); // Redirect to the new document
             }
         }
         catch(error){
@@ -157,7 +157,7 @@ export const Dashboard = () => {
             return documents.filter((doc) =>
                 doc.name.toLowerCase().includes(searchQuery.toLowerCase()) 
                 &&
-                doc.allowedUsers.includes(user.emailId))
+                doc.allowedUsers.some(person => person.emailId === user.emailId))
         }
         else return []   
     }
