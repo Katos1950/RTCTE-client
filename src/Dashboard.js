@@ -134,7 +134,7 @@ export const Dashboard = () => {
             )
             
             if (response.status === 201) {
-                navigate(`/document/${response.data._id}/${user.emailId}`); // Redirect to the new document
+                navigate(`/document/${response.data._id}`); // Redirect to the new document
             }
         }
         catch(error){
@@ -336,7 +336,7 @@ export const Dashboard = () => {
                         <button 
                             key={doc._id} 
                             className="document-btn" 
-                            onClick={() => navigate(`/document/${doc._id}/${user.emailId}`)}
+                            onClick={() => navigate(`/document/${doc._id}`)}
                         >
                             <div className="flex flex-row">
                                 <div className="w-3/5">

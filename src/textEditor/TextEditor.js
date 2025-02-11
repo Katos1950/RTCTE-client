@@ -5,6 +5,7 @@ import { io } from "socket.io-client";
 import { useParams } from 'react-router-dom';
 import "./TextEditor.css";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const TOOLBAR_OPTIONS = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -20,13 +21,31 @@ const TOOLBAR_OPTIONS = [
 export const TextEditor = () => {
   const [socket, setSocket] = useState();
   const [quill, setQuill] = useState();
-  const { id: documentId, emailId:emailId } = useParams();
+  const { id: documentId } = useParams();
+  const [emailId,setEmailId] = useState("")
   const [activeUsers, setActiveUsers] = useState([]);
   const [showActiveUsers,setShowActiveUsers] = useState(false)
   const SAVE_INTERVAL_MS = 2000;
   const navigate = useNavigate();
   
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if(!token)
+      navigate("/")
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded?.emailId) {
+          setEmailId(decoded.emailId);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+        setEmailId(""); // Reset email if token is invalid
+      }
+    }
+  }, []);
 
     // Close dropdown when clicking outside
   useEffect(() => {
@@ -54,10 +73,18 @@ export const TextEditor = () => {
   useEffect(() => {
     if (!socket || !quill) return;
 
-    socket.once("load-document", content => {
-      quill.setContents(content); // Load Quill Delta object
-      quill.enable();
-  });
+    socket.once("load-document", ({content,isEditor,isViewer}) => {
+
+      if(isEditor || isViewer){
+        quill.setContents(content);
+        if (isEditor) {
+            quill.enable(); // Enable editing if the user is an editor
+        } else {
+            quill.disable(); // Disable editing if the user is a viewer
+        }
+      }
+      else return
+    });
 
     socket.emit("get-document", {documentId,emailId});
   }, [socket, quill, documentId]);
