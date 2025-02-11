@@ -17,7 +17,9 @@ export const Dashboard = () => {
     const [currentName,setCurrentName] = useState("")
     const [renDoc,setRenDoc] = useState("")
     const [isRenaming,setIsRenaming] = useState(false)
-
+    const [isSharing,setIsSharing] = useState(false);
+    const [sharedEmail,setSharedEmail] = useState("")
+    const [role, setRole] = useState("viewer");
     const navigate = useNavigate();
 
     const openModal = ()=> setShowModal(true);
@@ -26,7 +28,10 @@ export const Dashboard = () => {
         setCreateDocError("")
         setShowModal(false);
         setIsRenaming(false)
+        setIsSharing(false)
         setRenDoc("")
+        setSharedEmail("")
+        setCurrentName("")
     }
 
     useEffect(() => {
@@ -66,6 +71,46 @@ export const Dashboard = () => {
             else{
                 setCreateDocError("");
                 createNewDoc();
+            }
+        }
+    }
+
+    const isSharedEmailValid = async ()=>{
+        if(sharedEmail==="")
+                setCreateDocError("email is required")
+        else if(documents.find(doc => doc.createdBy === sharedEmail)){
+                setCreateDocError("The file is already yours!")
+        }
+        else{
+            try {
+                setCreateDocError("");
+                const token = localStorage.getItem("token");
+
+                const response = await axios.get("http://localhost:5000/users/find", {
+                    headers: { Authorization: `Bearer ${token}` },
+                    params: { emailId: sharedEmail }
+                });
+
+                if(response.status===200){
+                    const docId = documents.find(doc=> doc.name === currentName)._id
+                    const response2 = await axios.post("http://localhost:5000/users/allowUser", {
+                        documentId: docId,
+                        emailId: sharedEmail,
+                        role: role
+                    }, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                }
+                closeModal()
+            } catch (error) {
+                if (error.response && error.response.status === 404) {
+                    setCreateDocError("Enter a valid registered email.");
+                }
+                else{
+                handleAuthError(error,()=>{
+                    isSharedEmailValid()
+                });
+                }
             }
         }
     }
@@ -267,19 +312,32 @@ export const Dashboard = () => {
                 <div className="relative p-4 w-full max-w-sm rounded-lg shadow bg-gray-800">
                   <div className="p-4 space-y-4">
                     <p className="text-2xl leading-relaxed text-white">
-                      {isRenaming?"Rename to?":"Name of the document?"}
+                      {isSharing ? "Share with(email)?" : isRenaming?"Rename to?":"Name of the document?"}
                     </p>
 
                     <div className="flex items-center justify-center p-4 md:p-5 border-t  rounded-b border-gray-400">
                         <input type="text" 
                         placeholder="name" 
-                        value={isRenaming?renDoc:docName}
+                        value={isSharing? sharedEmail : isRenaming?renDoc:docName}
                         onChange={(e) => {
                             if(isRenaming)
                                 setRenDoc(e.target.value)
+                            else if(isSharing)
+                                setSharedEmail(e.target.value)
                             else
                                 setDocName(e.target.value)
                         }}></input>
+                        
+                        {isSharing &&
+                            <select
+                                className="w-full p-2 border rounded-md"
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
+                            >
+                                <option value="viewer">Viewer</option>
+                                <option value="editor">Editor</option>
+                            </select>
+                        }
                     </div>
                     { createDocError && <p className="text-red-600">{createDocError}</p>}
 
@@ -294,7 +352,7 @@ export const Dashboard = () => {
 
                     <button
                       className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-8 py-3 text-center"
-                      onClick={checkIfDocExists}
+                      onClick={isSharing ? isSharedEmailValid : checkIfDocExists}
                     >
                       OK
                     </button>
@@ -360,6 +418,23 @@ export const Dashboard = () => {
                                         <i className="bi bi-pen"></i>
                                         </span>                                   
                                 }
+                                
+                                {
+                                    (doc.createdBy===user.emailId)?
+                                        <span className="w-10 flex flex-row justify-center items-center border-2 border-solid border-black" onClick={(e)=>{
+                                            e.stopPropagation(); // Prevents the button click from firing
+                                            setCurrentName(doc.name)
+                                            setIsSharing(true)
+                                            openModal()
+                                            }}>
+                                            <i className="bi bi-share"></i>
+                                        </span>
+                                        :
+                                        <span className="w-10 flex flex-row justify-center items-center border-2 border-solid border-gray-400 text-gray-400 cursor-not-allowed">
+                                        <i className="bi bi-share"></i>
+                                        </span>                                   
+                                }
+
                                 {
                                     (doc.createdBy===user.emailId)?
                                         <span className="w-10 flex flex-row justify-center items-center border-2 border-solid border-black" onClick={(e)=>{
