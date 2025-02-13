@@ -6,6 +6,9 @@ import { useParams } from 'react-router-dom';
 import "./TextEditor.css";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import QuillCursors from 'quill-cursors';
+
+Quill.register('modules/cursors', QuillCursors);
 
 const TOOLBAR_OPTIONS = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -79,6 +82,9 @@ export const TextEditor = () => {
         quill.setContents(content);
         if (isEditor) {
             quill.enable(); // Enable editing if the user is an editor
+            const cursors = quill.getModule('cursors');
+            cursors.createCursor(emailId, emailId, 'red');
+
         } else {
             quill.disable(); // Disable editing if the user is a viewer
         }
@@ -87,7 +93,7 @@ export const TextEditor = () => {
     });
 
     socket.emit("get-document", {documentId,emailId});
-  }, [socket, quill, documentId]);
+  }, [socket, quill, documentId,emailId]);
 
   useEffect(() => {
     if (!socket || !quill) return;
@@ -145,6 +151,47 @@ export const TextEditor = () => {
     };
   }, [socket]);
 
+  useEffect(() => {
+    if (!socket || !quill) return;
+  
+    const cursors = quill.getModule("cursors");
+  
+    // Send cursor position when user moves cursor
+    const handleSelectionChange = (range) => {
+      if (!range) return;
+  
+      // Send the cursor position to other users
+      socket.emit("send-cursor", { emailId, range });
+    };
+  
+    quill.on("selection-change", handleSelectionChange);
+  
+    // Listen for cursor updates from other users
+    socket.on("receive-cursor", ({ emailId: userEmail, range }) => {
+      if (userEmail !== emailId) {
+        // Ensure the cursor exists, or create it
+        if (!cursors.cursors[userEmail]) {
+          cursors.createCursor(userEmail, userEmail, getRandomColor());
+        }
+  
+        // Move the cursor to the correct position
+        cursors.moveCursor(userEmail, range);
+      }
+    });
+  
+    return () => {
+      quill.off("selection-change", handleSelectionChange);
+      socket.off("receive-cursor");
+    };
+  }, [socket, quill, emailId]);
+  
+  // Helper function to assign random colors to cursors
+  const getRandomColor = () => {
+    const colors = ["red", "blue", "green", "purple", "orange"];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+  
+
 
   const editorRef = useCallback(wrapper => {
     if (wrapper == null) return;
@@ -152,7 +199,7 @@ export const TextEditor = () => {
     wrapper.innerHTML = "";
     const editor = document.createElement("div");
     wrapper.append(editor);
-    const q = new Quill(editor, { theme: "snow", modules: { toolbar: TOOLBAR_OPTIONS } });
+    const q = new Quill(editor, { theme: "snow", modules: { toolbar: TOOLBAR_OPTIONS ,cursors:true} });
     q.disable();
     q.setText("Loading...");
     setQuill(q);
