@@ -28,7 +28,7 @@ export const TextEditor = () => {
   const [emailId,setEmailId] = useState("")
   const [activeUsers, setActiveUsers] = useState([]);
   const [showActiveUsers,setShowActiveUsers] = useState(false)
-  const SAVE_INTERVAL_MS = 2000;
+  const SAVE_INTERVAL_MS = 1000;
   const navigate = useNavigate();
   
   const dropdownRef = useRef(null);
@@ -178,10 +178,16 @@ export const TextEditor = () => {
         cursors.moveCursor(userEmail, range);
       }
     });
+
+    socket.on("remove-cursor", (userEmail) => {
+      cursors.removeCursor(userEmail);
+    });
+  
   
     return () => {
       quill.off("selection-change", handleSelectionChange);
       socket.off("receive-cursor");
+      socket.off("remove-cursor");
     };
   }, [socket, quill, emailId]);
   
