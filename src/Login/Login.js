@@ -12,6 +12,38 @@ export const Login = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate(); // Hook to handle navigation
 
+  const handleResetClick = async(e)=>{
+
+    const resetPassvalidationSchema = Yup.object({
+      emailId: Yup.string().required("Email is required").email("Invalid email format"),
+    })
+
+    e.preventDefault();
+    setErrors({}); // Reset errors before validation
+    
+    try {
+      await resetPassvalidationSchema.validate({ emailId}, { abortEarly: false });
+
+      const response = await axios.post("http://localhost:5000/users/sendPassResetLink", {
+        emailId
+      });
+
+      
+    } catch (error) {
+      const newErrors = {};
+      if (error.inner) {
+        error.inner.forEach((err) => {
+          newErrors[err.path] = err.message;
+        });
+      } else if (error.response && error.response.data) {
+        Object.keys(error.response.data).forEach((key) => {
+          newErrors[key] = error.response.data[key];
+        });
+      }
+      setErrors(newErrors);
+    }
+  }
+
   const validationSchema = Yup.object({
     emailId: Yup.string().required("Email is required").email("Invalid email format"),
     password: Yup.string().required("Password is required"),
@@ -81,6 +113,9 @@ export const Login = () => {
 
           <button type="submit" className="btn">Sign In</button>
           <hr className="divider" />
+          <p>
+          Forgot Password?  <span onClick={handleResetClick} style={{ color: 'blue', cursor: 'pointer' }}>Reset</span>
+          </p>
 
           <p>
             Don't have an account? <Link to="/signup">Sign Up</Link>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./Login.css";
 import ThreeD from "./ThreeD";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams} from "react-router-dom";
 import * as Yup from "yup";
 
 export const ForgotPassword = () => {
@@ -24,23 +24,23 @@ export const ForgotPassword = () => {
       .oneOf([Yup.ref("password")], "Passwords must match")
       .required("Confirm your password"),
   });
-
+  const {token}=useParams()
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setErrors({});
 
     try {
       await validationSchema.validate(
-        { emailId, password, confirmPassword },
+        { password, confirmPassword },
         { abortEarly: false }
       );
 
-      const response = await axios.post("http://localhost:4000/users/resetpassword", {
-        emailId,
+      const response = await axios.post("http://localhost:5000/users/resetpassword", {
+        token,
         password,
       });
 
-      if(response.status === 201){
+      if(response.status === 200){
         navigate("/");
       }
       console.log(response.data);
@@ -94,7 +94,7 @@ export const ForgotPassword = () => {
           </div>
 
           <button type="submit" className="btn">
-            Register
+            Reset
           </button>
 
           <hr className="divider" />

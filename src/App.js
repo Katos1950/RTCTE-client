@@ -13,7 +13,7 @@ const App = () => {
         <Route path="/signup" element={<SignUp/>}></Route>
         <Route path="/dashboard" element={<Dashboard/>}></Route>
         <Route path="/document/:id" element={<TextEditor/>}></Route>  
-        <Route path="/forgotpassword" element={<ForgotPassword/>}></Route>  
+        <Route path="/resetpassword/:token" element={<ForgotPassword/>}></Route>  
       </Routes>
     </Router>
   )
