@@ -213,7 +213,7 @@ export const TextEditor = () => {
 
   return (
     <div className='w-full h-full relative'>
-      <div className='w-full h-10 flex flex-row justify-between items-center relative'>
+      <div className='titlebar'>
         <i onClick={() => { navigate("/dashboard") }} className="p-3 bi bi-arrow-left-circle w-4/12 text-2xl"></i>
         <p className='w-4/12 text-center text-2xl'>LetterPad</p>
         <div className='relative w-4/12 text-right' ref={dropdownRef}>
