@@ -51,6 +51,10 @@ export const ForgotPassword = () => {
           newErrors[err.path] = err.message;
         });
       } else if (error.response && error.response.data) {
+        if (error.response.data.error === "Invalid or expired token") {
+          alert("Your reset link has expired. Please request a new one.");
+          navigate("/")
+        }
         Object.keys(error.response.data).forEach((key) => {
           newErrors[key] = error.response.data[key];
         });

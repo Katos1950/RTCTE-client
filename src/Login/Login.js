@@ -27,8 +27,8 @@ export const Login = () => {
       const response = await axios.post("http://localhost:5000/users/sendPassResetLink", {
         emailId
       });
+      if(response.status===200) alert("Password reset link sent to the email.")
 
-      
     } catch (error) {
       const newErrors = {};
       if (error.inner) {
