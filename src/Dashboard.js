@@ -22,6 +22,7 @@ export const Dashboard = () => {
     const [role, setRole] = useState("viewer");
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [docToDelete, setDocToDelete] = useState(null);
+    const isLoggingOut = useRef(false);
     const navigate = useNavigate();
 
     const openModal = () => setShowModal(true);
@@ -152,9 +153,13 @@ export const Dashboard = () => {
                     return;
                 }
             } catch {
-                localStorage.removeItem("token")
-                localStorage.removeItem("refreshToken")
-                navigate("/");
+                if (!isLoggingOut.current) {
+                    isLoggingOut.current = true; // Prevent multiple alerts and redirects
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("refreshToken");
+                    alert("Session timed out!");
+                    navigate("/");
+                }
             }
         }
         console.error("Error:", error);
