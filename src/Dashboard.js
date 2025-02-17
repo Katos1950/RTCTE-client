@@ -152,6 +152,8 @@ export const Dashboard = () => {
                     return;
                 }
             } catch {
+                localStorage.removeItem("token")
+                localStorage.removeItem("refreshToken")
                 navigate("/");
             }
         }
