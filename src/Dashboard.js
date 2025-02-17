@@ -233,6 +233,8 @@ export const Dashboard = () => {
         await axios.delete("http://localhost:4000/users/logout", {
             data: { token: localStorage.getItem("refreshToken") },
         });
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
         navigate("/");
     };
 
