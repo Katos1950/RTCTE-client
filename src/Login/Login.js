@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Login.css";
 import ThreeD from "./ThreeD";
 import axios from "axios";
@@ -12,6 +12,10 @@ export const Login = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate(); // Hook to handle navigation
 
+  useEffect(()=>{
+    localStorage.setItem("token",null);
+    localStorage.setItem("refreshToken",null);
+  },[])
   const handleResetClick = async(e)=>{
 
     const resetPassvalidationSchema = Yup.object({
