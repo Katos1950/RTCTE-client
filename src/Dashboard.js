@@ -243,8 +243,8 @@ export const Dashboard = () => {
             <header className="app-header">
                 <div className="header-content">
                     <h1 className="app-title">
-                        <span className="logo-icon">✎</span>
-                        LetterPad
+                        <img className="logo-icon" src="/logo192.png"></img>
+                        CoWrite
                     </h1>
                     <div className="profile-container">
                         <button
@@ -267,12 +267,6 @@ export const Dashboard = () => {
                                         <p>{user.emailId}</p>
                                     </div>
                                 </div>
-                                {/* <button className="menu-item">
-                                    <i className="bi bi-pencil-square"></i> Edit Profile
-                                </button>
-                                <button className="menu-item">
-                                    <i className="bi bi-envelope-paper"></i> Requests
-                                </button> */}
                                 <button className="menu-item" onClick={logout}>
                                     <i className="bi bi-box-arrow-right"></i> Logout
                                 </button>
