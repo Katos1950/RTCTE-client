@@ -65,7 +65,7 @@ export const TextEditor = () => {
   }, []);
 
   useEffect(() => {
-    const s = io("http://localhost:3001");
+    const s = io("http://18.119.123.153/editor/");
     setSocket(s);
 
     return () => {

@@ -35,7 +35,7 @@ export const ForgotPassword = () => {
         { abortEarly: false }
       );
 
-      const response = await axios.post("http://localhost:5000/users/resetpassword", {
+      const response = await axios.post("http://18.119.123.153/api/users/resetpassword", {
         token,
         password,
       });
