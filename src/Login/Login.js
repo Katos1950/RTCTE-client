@@ -28,7 +28,7 @@ export const Login = () => {
     try {
       await resetPassvalidationSchema.validate({ emailId}, { abortEarly: false });
 
-      const response = await axios.post("http://18.119.123.153/api/users/sendPassResetLink", {
+      const response = await axios.post("http://localhost:5000/users/sendPassResetLink", {
         emailId
       });
       if(response.status===200) alert("Password reset link sent to the email.")
@@ -60,7 +60,7 @@ export const Login = () => {
     try {
       await validationSchema.validate({ emailId, password }, { abortEarly: false });
 
-      const response = await axios.post("http://18.119.123.153/auth/users/login", {
+      const response = await axios.post("http://localhost:4000/users/login", {
         emailId,
         password,
       });

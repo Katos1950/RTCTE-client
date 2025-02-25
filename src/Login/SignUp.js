@@ -40,7 +40,7 @@ export const SignUp = () => {
         { abortEarly: false }
       );
 
-      const response = await axios.post("http://18.119.123.153/api/users/signUp", {
+      const response = await axios.post("http://localhost:5000/users/signUp", {
         userName,
         emailId,
         password,
