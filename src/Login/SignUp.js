@@ -40,7 +40,7 @@ export const SignUp = () => {
         { abortEarly: false }
       );
 
-      const response = await axios.post("http://localhost:5000/users/signUp", {
+      const response = await axios.post(`http://${process.env.REACT_APP_EC2_IP}/api/users/signUp`, {
         userName,
         emailId,
         password,

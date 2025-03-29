@@ -5,6 +5,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
+
 export const Login = () => {
   const [emailId, setEmailId] = useState("");
   const [password, setPassword] = useState("");
@@ -15,6 +16,7 @@ export const Login = () => {
   useEffect(()=>{
     localStorage.setItem("token",null);
     localStorage.setItem("refreshToken",null);
+
   },[])
   const handleResetClick = async(e)=>{
 
@@ -28,7 +30,7 @@ export const Login = () => {
     try {
       await resetPassvalidationSchema.validate({ emailId}, { abortEarly: false });
 
-      const response = await axios.post("http://localhost:5000/users/sendPassResetLink", {
+      const response = await axios.post(`http://${process.env.REACT_APP_EC2_IP}/api/users/sendPassResetLink`, {
         emailId
       });
       if(response.status===200) alert("Password reset link sent to the email.")
@@ -59,8 +61,7 @@ export const Login = () => {
     
     try {
       await validationSchema.validate({ emailId, password }, { abortEarly: false });
-
-      const response = await axios.post("http://localhost:4000/users/login", {
+      const response = await axios.post(`http://${process.env.REACT_APP_EC2_IP}/auth/users/login`, {
         emailId,
         password,
       });
