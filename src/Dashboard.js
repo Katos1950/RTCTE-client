@@ -83,7 +83,7 @@ export const Dashboard = () => {
                 setCreateDocError("");
                 const token = localStorage.getItem("token");
 
-                const response = await axios.get(`https://${process.env.REACT_APP_EC2_IP}/api/users/find`, {
+                const response = await axios.get(`http://${process.env.REACT_APP_EC2_IP}/api/users/find`, {
                     headers: { Authorization: `Bearer ${token}` },
                     params: { emailId: sharedEmail },
                 });
@@ -91,7 +91,7 @@ export const Dashboard = () => {
                 if (response.status === 200) {
                     const docId = documents.find((doc) => doc.name === currentName)._id;
                     await axios.post(
-                        `https://${process.env.REACT_APP_EC2_IP}/api/users/allowUser`,
+                        `http://${process.env.REACT_APP_EC2_IP}/api/users/allowUser`,
                         {
                             documentId: docId,
                             emailId: sharedEmail,
@@ -114,7 +114,7 @@ export const Dashboard = () => {
     const getDocuments = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get(`https://${process.env.REACT_APP_EC2_IP}/api/users/documents`, {
+            const response = await axios.get(`http://${process.env.REACT_APP_EC2_IP}/api/users/documents`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setDocuments(response.data);
@@ -129,7 +129,7 @@ export const Dashboard = () => {
     const getUserProfile = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get(`https://${process.env.REACT_APP_EC2_IP}/api/users/profile`, {
+            const response = await axios.get(`http://${process.env.REACT_APP_EC2_IP}/api/users/profile`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setUser(response.data);
@@ -144,7 +144,7 @@ export const Dashboard = () => {
     const handleAuthError = async (error, fn) => {
         if (error.response?.status === 403) {
             try {
-                const newToken = await axios.post(`https://${process.env.REACT_APP_EC2_IP}/auth/users/token`, {
+                const newToken = await axios.post(`http://${process.env.REACT_APP_EC2_IP}/auth/users/token`, {
                     token: localStorage.getItem("refreshToken"),
                 });
                 if (newToken) {
@@ -174,7 +174,7 @@ export const Dashboard = () => {
         try {
             const token = localStorage.getItem("token");
             const response = await axios.post(
-                `https://${process.env.REACT_APP_EC2_IP}/api/users/createNewDoc`,
+                `http://${process.env.REACT_APP_EC2_IP}/api/users/createNewDoc`,
                 { emailId: user.emailId, name: docName },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -205,7 +205,7 @@ export const Dashboard = () => {
     const deleteDoc = async (documentName) => {
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`https://${process.env.REACT_APP_EC2_IP}/api/users/documents/del`, {
+            await axios.delete(`http://${process.env.REACT_APP_EC2_IP}/api/users/documents/del`, {
                 headers: { Authorization: `Bearer ${token}` },
                 data: { emailId: user.emailId, name: documentName },
             });
@@ -219,7 +219,7 @@ export const Dashboard = () => {
         try {
             const token = localStorage.getItem("token");
             await axios.put(
-                `https://${process.env.REACT_APP_EC2_IP}/api/users/documents/rename`,
+                `http://${process.env.REACT_APP_EC2_IP}/api/users/documents/rename`,
                 { emailId: user.emailId, name: currentName, newName: renDoc },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -230,7 +230,7 @@ export const Dashboard = () => {
     };
 
     const logout = async () => {
-        await axios.delete(`https://${process.env.REACT_APP_EC2_IP}/auth/users/logout`, {
+        await axios.delete(`http://${process.env.REACT_APP_EC2_IP}/auth/users/logout`, {
             data: { token: localStorage.getItem("refreshToken") },
         });
         localStorage.removeItem("token");
