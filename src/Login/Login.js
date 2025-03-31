@@ -61,7 +61,7 @@ export const Login = () => {
     
     try {
       await validationSchema.validate({ emailId, password }, { abortEarly: false });
-      const response = await axios.post(`https://api.co-write.app/auth/users/login`, {
+      const response = await axios.post(`https://api.co-write.online/auth/users/login`, {
         emailId,
         password,
       });

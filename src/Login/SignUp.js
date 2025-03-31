@@ -40,7 +40,7 @@ export const SignUp = () => {
         { abortEarly: false }
       );
 
-      const response = await axios.post(`https://api.co-write.app/api/users/signUp`, {
+      const response = await axios.post(`https://api.co-write.online/api/users/signUp`, {
         userName,
         emailId,
         password,
