@@ -65,7 +65,7 @@ export const TextEditor = () => {
   }, []);
 
   useEffect(() => {
-    const s = io(`http://${process.env.REACT_APP_EC2_IP}/editor`);
+    const s = io(`https://api.co-write.app/editor`);
     setSocket(s);
 
     return () => {

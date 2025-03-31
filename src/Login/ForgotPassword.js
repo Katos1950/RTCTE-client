@@ -35,7 +35,7 @@ export const ForgotPassword = () => {
         { abortEarly: false }
       );
 
-      const response = await axios.post(`http://${process.env.REACT_APP_EC2_IP}/api/users/resetpassword`, {
+      const response = await axios.post(`https://api.co-write.app/api/users/resetpassword`, {
         token,
         password,
       });
