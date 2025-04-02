@@ -65,7 +65,7 @@ export const TextEditor = () => {
   }, []);
 
   useEffect(() => {
-    const s = io("https://api.co-write.online/editor", {
+    const s = io("https://api.co-write.online", {
       withCredentials: true,
       path: "/editor/socket.io", // Must match server path
       transports: ["websocket", "polling"], // Explicit transports
