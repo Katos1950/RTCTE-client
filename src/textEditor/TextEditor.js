@@ -66,7 +66,7 @@ export const TextEditor = () => {
 
   useEffect(() => {
     //revert
-    const s = io(`https://api.co-write.online:3001`);
+    const s = io(`https://api.co-write.online/editor`);
     setSocket(s);
 
     return () => {
