@@ -46,6 +46,8 @@ export const SignUp = () => {
         password,
       });
 
+      if(response.status===201) alert("Email verification link sent to the email.")
+        
       if(response.status === 201){
         navigate("/");
       }
