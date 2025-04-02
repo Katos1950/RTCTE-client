@@ -65,8 +65,13 @@ export const TextEditor = () => {
   }, []);
 
   useEffect(() => {
-    //revert
-    const s = io(`https://api.co-write.online/editor`);
+    const s = io("https://api.co-write.online/editor", {
+      withCredentials: true,
+      path: "/editor/socket.io", // Must match server path
+      transports: ["websocket", "polling"], // Explicit transports
+      autoConnect: true,
+      reconnection: true
+    });
     setSocket(s);
 
     return () => {
