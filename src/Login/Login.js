@@ -30,7 +30,7 @@ export const Login = () => {
     try {
       await resetPassvalidationSchema.validate({ emailId}, { abortEarly: false });
 
-      const response = await axios.post(`https://${process.env.REACT_APP_EC2_IP}/api/users/sendPassResetLink`, {
+      const response = await axios.post(`https://api.co-write.online/api/users/sendPassResetLink`, {
         emailId
       });
       if(response.status===200) alert("Password reset link sent to the email.")
