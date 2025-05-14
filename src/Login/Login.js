@@ -123,7 +123,7 @@ export const Login = () => {
           </p>
 
           <p>
-            Don't have an account? <Link to="/signup">Sign Up</Link>
+            Don't have an account? <Link to="/signup" style={{ color: 'blue', cursor: 'pointer' }}>Sign Up</Link>
           </p>
         </form>
       </div>

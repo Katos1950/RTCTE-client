@@ -129,7 +129,7 @@ export const SignUp = () => {
           <hr className="divider" />
 
           <p>
-            Already have an account? <Link to="/">Log In</Link>
+            Already have an account? <Link to="/" style={{ color: 'blue', cursor: 'pointer' }}>Log In</Link>
           </p>
         </form>
       </div>
