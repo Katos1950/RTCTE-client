@@ -33,7 +33,7 @@ export const Login = () => {
       const response = await axios.post(`https://api.co-write.online/api/users/sendPassResetLink`, {
         emailId
       });
-      if(response.status===200) alert("Password reset link sent to the email.")
+      if(response.status===200) alert("Password reset link sent to the email. Do check the spam folder.")
 
     } catch (error) {
       const newErrors = {};
